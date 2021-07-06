@@ -159,7 +159,7 @@ function App() {
                             key={100 + index}
                             nodeId={'100' + index.toString()}
                             label={k.name}
-                            children={getChildrenRecursive(k)}
+                            // children={getChildrenRecursive(k)}
                             // children={undefined}
                           />
                         );
@@ -176,8 +176,43 @@ function App() {
    );
   }
 
+  const printChildrenRecursive = (t, depth) => {
+    if(t.children.length === 0)  {
+      return
+    }
+    t.children.forEach(child => {
+      if(child.selected === 1) {
+        let arrowString = '';
+        for(let i = 1; i <= depth; i++) {
+          arrowString = arrowString + '-';
+        }
+        console.log(`${arrowString}>${depth} ${child.name}`);
+        printChildrenRecursive(child, ++depth); 
+      }
+    })
+  }
+  
+  
+  const getRecommendations = (recommendations) => {
+  
+    recommendations.forEach((rec, idx) => {
+      console.log("->1 ",rec.RestaurantName);
+      rec.menu.forEach(child => {
+        if(child.type === "sectionheader") {
+          child.children.forEach(k => {
+            if((k.type === "item") && (k.selected === 1)) {
+              console.log("-->2",k.name);
+              printChildrenRecursive(k, 3);
+            }
+          })
+        }
+      })
+    })
+  }
+
   return (
     <div>
+      {recommendations && console.log(getRecommendations(recommendations))}
       {recommendations && <DataTreeView treeItems={recommendations} />}
     </div>
   );
