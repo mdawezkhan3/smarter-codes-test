@@ -123,3 +123,215 @@ const getRecommendations = (recommendations, length) => {
     })
   })
 }
+
+
+
+const getTreeItemsFromData = treeItems => {
+  return treeItems.map(treeItemData => {
+    let children = undefined;
+    if (treeItemData.children && treeItemData.children.length > 0) {
+      children = getTreeItemsFromData(treeItemData.children);
+    }
+    return (
+      <TreeItem
+        key={treeItemData.id}
+        nodeId={treeItemData.id}
+        label={treeItemData.name}
+        children={children}
+      />
+    );
+  });
+};
+
+
+
+const PrintChildrenRecursive = ({ k, depth }) => {
+  if(k.children.length === 0)  {
+    return (
+      <TreeItem
+        key={depth}
+        nodeId={depth.toString()}
+        label={k.name}
+        children={undefined}
+      />
+    );
+  }
+  
+ return (
+  <>
+  {k.children.filter(child => {
+     if(child.selected === 1) {
+       <TreeItem
+         key={depth}
+         nodeId={depth.toString()}
+         label={child.name}
+         children={<PrintChildrenRecursive k={child} depth={++depth} />}
+       />
+     }
+   })}
+ </>
+ )
+}
+
+
+const getChildrenRecursive = (k) => {
+  return k.map(treeItemData => {
+    let children = undefined;
+    if (treeItemData.children && treeItemData.children.length > 0) {
+      children = getTreeItemsFromData(treeItemData.children);
+    }
+    return (
+      <TreeItem
+        key={treeItemData.id}
+        nodeId={treeItemData.id}
+        label={treeItemData.name}
+        children={children}
+      />
+    );
+  });
+}
+
+
+const getTreeItemsFromData = treeItems => {
+  return treeItems.map(treeItemData => {
+    let children = undefined;
+    if (treeItemData.children && treeItemData.children.length > 0) {
+      children = getTreeItemsFromData(treeItemData.children);
+    }
+    return (
+      <TreeItem
+        key={treeItemData.id}
+        nodeId={treeItemData.id}
+        label={treeItemData.name}
+        children={children}
+      />
+    );
+  });
+};
+
+const getItems = (child) => {
+  
+ return (child.children.filter((k, idx) => {
+    if((k.type === "item") && (k.selected === 1)) {
+      return (
+        <TreeItem
+          key={100 + idx}
+          nodeId={'100' + idx.toString()}
+          label={k.name}
+          // children={printChildrenRecursive(k, 100)}
+          children={undefined}
+        />
+      );
+    }
+  }));
+}
+
+const GetMenuChildren = ({ rec }) => {
+  
+ return (
+   <>
+    {(rec.menu.filter(child => {
+    if(child.type === "sectionheader") {
+      return (child.children.filter((k, idx) => {
+        if((k.type === "item") && (k.selected === 1)) {
+          return (
+            <TreeItem
+              key={100 + idx}
+              nodeId={'100' + idx.toString()}
+              label={k.name}
+              // children={printChildrenRecursive(k, 100)}
+              children={undefined}
+            />
+          );
+        }
+      }));
+    }
+    }))}
+   </>
+ )
+}
+
+const DataTreeView = ({ treeItems }) => {
+  return (
+    <TreeView
+      defaultCollapseIcon={<ArrowDropDownIcon />}
+      defaultExpandIcon={<ArrowRightIcon />}
+    >
+      {treeItems.map((rec, idx) => {
+
+        
+
+        return (
+          <TreeItem
+              key={idx}
+              nodeId={idx.toString()}
+              label={rec.RestaurantName}
+              // children={<GetMenuChildren rec={rec}/>}
+              children={
+                <>
+                {(rec.menu.filter(child => {
+                if(child.type === "sectionheader") {
+                  return (child.children.filter((k, index) => {
+                    if((k.type === "item") && (k.selected === 1)) {
+                      return (
+                        <TreeItem
+                          key={100 + index}
+                          nodeId={'100' + index.toString()}
+                          label={k.name}
+                          children={getChildrenRecursive(k)}
+                          children={undefined}
+                        />
+                      );
+                    }
+                  }));
+                }
+                }))}
+              </>
+              }
+          />
+          );
+        })}
+    </TreeView>
+ );
+}
+
+const printChildrenRecursive = (t, depth) => {
+  if(t.children.length === 0)  {
+    return
+  }
+  t.children.forEach(child => {
+    if(child.selected === 1) {
+      let arrowString = '';
+      for(let i = 1; i <= depth; i++) {
+        arrowString = arrowString + '-';
+      }
+      console.log(`${arrowString}>${depth} ${child.name}`);
+      printChildrenRecursive(child, ++depth); 
+    }
+  })
+}
+
+
+const getRecommendations = (recommendations) => {
+
+  recommendations.forEach((rec, idx) => {
+    console.log("->1 ",rec.RestaurantName);
+    rec.menu.forEach(child => {
+      if(child.type === "sectionheader") {
+        child.children.forEach(k => {
+          if((k.type === "item") && (k.selected === 1)) {
+            console.log("-->2",k.name);
+            printChildrenRecursive(k, 3);
+          }
+        })
+      }
+    })
+  })
+}
+
+return (
+  <div>
+    {recommendations && console.log(getRecommendations(recommendations))}
+    {recommendations && <DataTreeView treeItems={recommendations} />}
+  </div>
+);

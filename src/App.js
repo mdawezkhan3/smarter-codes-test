@@ -16,7 +16,7 @@ const useStyles = makeStyles({
 
 function App() {
 
-  // const classes = useStyles();
+  const classes = useStyles();
   const [recommendations, setRecommendations] = useState(null);
 
   useEffect(async () => {
@@ -28,192 +28,71 @@ function App() {
 
 
 
-  // const PrintChildrenRecursive = ({ k, depth }) => {
-  //   if(k.children.length === 0)  {
-  //     return (
-  //       <TreeItem
-  //         key={depth}
-  //         nodeId={depth.toString()}
-  //         label={k.name}
-  //         children={undefined}
-  //       />
-  //     );
-  //   }
-    
-  //  return (
-  //   <>
-  //   {k.children.filter(child => {
-  //      if(child.selected === 1) {
-  //        <TreeItem
-  //          key={depth}
-  //          nodeId={depth.toString()}
-  //          label={child.name}
-  //          children={<PrintChildrenRecursive k={child} depth={++depth} />}
-  //        />
-  //      }
-  //    })}
-  //  </>
-  //  )
-  // }
 
 
-  const getChildrenRecursive = (k) => {
-    return k.map(treeItemData => {
+  const getChildrenRecursively = (treeItems, depth) => {
+
+    return treeItems.map((treeItemData, idx) => {
       let children = undefined;
-      if (treeItemData.children && treeItemData.children.length > 0) {
-        children = getTreeItemsFromData(treeItemData.children);
+      if (treeItemData.selected === 1 && treeItemData.children && treeItemData.children.length > 0) {
+        children = getChildrenRecursively(treeItemData.children, ++depth);
       }
       return (
         <TreeItem
-          key={treeItemData.id}
-          nodeId={treeItemData.id}
+          key={idx + depth}
+          nodeId={(depth + idx).toString()}
           label={treeItemData.name}
           children={children}
         />
       );
-    });
+    });    
+
   }
 
-
-  const getTreeItemsFromData = treeItems => {
-    return treeItems.map(treeItemData => {
-      let children = undefined;
-      if (treeItemData.children && treeItemData.children.length > 0) {
-        children = getTreeItemsFromData(treeItemData.children);
-      }
-      return (
-        <TreeItem
-          key={treeItemData.id}
-          nodeId={treeItemData.id}
-          label={treeItemData.name}
-          children={children}
-        />
-      );
-    });
-  };
-
-  const getItems = (child) => {
-    
-   return (child.children.filter((k, idx) => {
+  const getItems = (rec) => {
+ 
+    // return arr.map((a, idx) => <TreeItem key={idx + 100} nodeId={(idx + 100).toString()} label={a} children={undefined} />);
+    return rec.children.filter((k, idx) => {
       if((k.type === "item") && (k.selected === 1)) {
+
         return (
           <TreeItem
-            key={100 + idx}
+            key={idx + 100}
             nodeId={'100' + idx.toString()}
             label={k.name}
-            // children={printChildrenRecursive(k, 100)}
-            children={undefined}
+            children={getChildrenRecursively(k.children, 1000)}
           />
         );
       }
-    }));
+    });
   }
 
-  const GetMenuChildren = ({ rec }) => {
-    
-   return (
-     <>
-      {(rec.menu.filter(child => {
-      if(child.type === "sectionheader") {
-        return (child.children.filter((k, idx) => {
-          if((k.type === "item") && (k.selected === 1)) {
-            return (
-              <TreeItem
-                key={100 + idx}
-                nodeId={'100' + idx.toString()}
-                label={k.name}
-                // children={printChildrenRecursive(k, 100)}
-                children={undefined}
-              />
-            );
-          }
-        }));
-      }
-      }))}
-     </>
-   )
-  }
-
-  const DataTreeView = ({ treeItems }) => {
+  const DataTreeView = ({ recommendations }) => {
     return (
       <TreeView
         defaultCollapseIcon={<ArrowDropDownIcon />}
         defaultExpandIcon={<ArrowRightIcon />}
       >
-        {treeItems.map((rec, idx) => {
+        {recommendations.map((rec, idx) => {
+          console.log(getItems(rec.menu[0]));
 
           return (
             <TreeItem
-                key={idx}
-                nodeId={idx.toString()}
-                label={rec.RestaurantName}
-                // children={<GetMenuChildren rec={rec}/>}
-                children={
-                  <>
-                  {(rec.menu.filter(child => {
-                  if(child.type === "sectionheader") {
-                    return (child.children.filter((k, index) => {
-                      if((k.type === "item") && (k.selected === 1)) {
-                        return (
-                          <TreeItem
-                            key={100 + index}
-                            nodeId={'100' + index.toString()}
-                            label={k.name}
-                            // children={getChildrenRecursive(k)}
-                            // children={undefined}
-                          />
-                        );
-                      }
-                    }));
-                  }
-                  }))}
-                </>
-                }
-            />
-            );
-          })}
+            key={idx}
+            nodeId={idx.toString()}
+            label={rec.RestaurantName}
+            children={getItems(rec.menu[0])}
+          />
+          );
+        })}
       </TreeView>
    );
   }
 
-  const printChildrenRecursive = (t, depth) => {
-    if(t.children.length === 0)  {
-      return
-    }
-    t.children.forEach(child => {
-      if(child.selected === 1) {
-        let arrowString = '';
-        for(let i = 1; i <= depth; i++) {
-          arrowString = arrowString + '-';
-        }
-        console.log(`${arrowString}>${depth} ${child.name}`);
-        printChildrenRecursive(child, ++depth); 
-      }
-    })
-  }
-  
-  
-  const getRecommendations = (recommendations) => {
-  
-    recommendations.forEach((rec, idx) => {
-      console.log("->1 ",rec.RestaurantName);
-      rec.menu.forEach(child => {
-        if(child.type === "sectionheader") {
-          child.children.forEach(k => {
-            if((k.type === "item") && (k.selected === 1)) {
-              console.log("-->2",k.name);
-              printChildrenRecursive(k, 3);
-            }
-          })
-        }
-      })
-    })
-  }
 
   return (
     <div>
-      {recommendations && console.log(getRecommendations(recommendations))}
-      {recommendations && <DataTreeView treeItems={recommendations} />}
+      {recommendations && <DataTreeView recommendations={recommendations} />}
     </div>
   );
 }
