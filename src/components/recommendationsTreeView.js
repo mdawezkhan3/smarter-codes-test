@@ -9,7 +9,7 @@ const RecommendationsTreeView = ({ recommendations }) => {
 
 
   const getChildrenRecursively = (items) => {
-    
+
     return items.map((item) => {
       let children = undefined;
       if (item.children && item.children.length > 0) {
@@ -65,12 +65,14 @@ const RecommendationsTreeView = ({ recommendations }) => {
     >
       {recommendations.map((recommendation, idx) => {
         return (
-          <TreeItem
-            key={idx}
-            nodeId={idx.toString()}
-            label={recommendation.RestaurantName}
-            children={getItems(recommendation)}
-          />
+          <div draggable="true">
+            <TreeItem
+              key={idx}
+              nodeId={idx.toString()}
+              label={recommendation.RestaurantName}
+              children={getItems(recommendation)}
+            />
+          </div>
         );
       })}
     </TreeView>
