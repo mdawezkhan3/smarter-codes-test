@@ -14,7 +14,7 @@ const useStyles = makeStyles({
   },
 });
 
-function App() {
+const App = () => {
 
   const classes = useStyles();
   const [recommendations, setRecommendations] = useState(null);
@@ -22,26 +22,22 @@ function App() {
   useEffect(async () => {
     const response = await fetch('https://api.npoint.io/93bed93a99df4c91044e');
     const data = await response.json();
-    const rec = data.body.Recommendations;
-    setRecommendations(rec);
+    setRecommendations(data.body.Recommendations);
   }, []);
 
 
-
-
-
-  const getChildrenRecursively = (treeItems, depth) => {
-
-    return treeItems.map((treeItemData, idx) => {
+  const getChildrenRecursively = (items) => {
+    return items.map((item) => {
       let children = undefined;
-      if (treeItemData.selected === 1 && treeItemData.children && treeItemData.children.length > 0) {
-        children = getChildrenRecursively(treeItemData.children, ++depth);
+      if (item.children && item.children.length > 0) {
+        const filteredChildren = item.children.filter(tree => tree.selected === 1);
+        children = getChildrenRecursively(filteredChildren);
       }
       return (
         <TreeItem
-          key={idx + depth}
-          nodeId={(depth + idx).toString()}
-          label={treeItemData.name}
+          key={item.id}
+          nodeId={item.id}
+          label={item.name}
           children={children}
         />
       );
@@ -49,22 +45,29 @@ function App() {
 
   }
 
-  const getItems = (rec) => {
- 
-    // return arr.map((a, idx) => <TreeItem key={idx + 100} nodeId={(idx + 100).toString()} label={a} children={undefined} />);
-    return rec.children.filter((k, idx) => {
-      if((k.type === "item") && (k.selected === 1)) {
+  const getItems = (recommendation) => {
 
-        return (
-          <TreeItem
-            key={idx + 100}
-            nodeId={'100' + idx.toString()}
-            label={k.name}
-            children={getChildrenRecursively(k.children, 1000)}
-          />
-        );
+    return recommendation.menu.map(menu => {
+      if(menu.type === "sectionheader") {
+        return menu.children.map((item, idx) => {
+          if((item.type === "item") && (item.selected === 1)) {
+            const filteredItems = item.children.filter(i => i.selected === 1);
+            return (
+              <TreeItem
+                key={item.id}
+                nodeId={item.id}
+                label={item.name}
+                children={getChildrenRecursively(filteredItems)}
+              />
+            );
+          } else {
+            return null;
+          }
+        });
+      } else {
+        return null;
       }
-    });
+    })
   }
 
   const DataTreeView = ({ recommendations }) => {
@@ -73,16 +76,14 @@ function App() {
         defaultCollapseIcon={<ArrowDropDownIcon />}
         defaultExpandIcon={<ArrowRightIcon />}
       >
-        {recommendations.map((rec, idx) => {
-          console.log(getItems(rec.menu[0]));
-
+        {recommendations.map((recommendation, idx) => {
           return (
             <TreeItem
-            key={idx}
-            nodeId={idx.toString()}
-            label={rec.RestaurantName}
-            children={getItems(rec.menu[0])}
-          />
+              key={idx}
+              nodeId={idx.toString()}
+              label={recommendation.RestaurantName}
+              children={getItems(recommendation)}
+            />
           );
         })}
       </TreeView>
