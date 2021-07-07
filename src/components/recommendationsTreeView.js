@@ -9,6 +9,7 @@ const RecommendationsTreeView = ({ recommendations }) => {
 
 
   const getChildrenRecursively = (items) => {
+    
     return items.map((item) => {
       let children = undefined;
       if (item.children && item.children.length > 0) {
@@ -16,12 +17,14 @@ const RecommendationsTreeView = ({ recommendations }) => {
         children = getChildrenRecursively(filteredChildren);
       }
       return (
-        <TreeItem
-          key={item.id}
-          nodeId={item.id}
-          label={item.name}
-          children={children}
-        />
+        <div draggable="true">
+          <TreeItem
+            key={item.id}
+            nodeId={item.id}
+            label={item.name}
+            children={children}
+          />
+        </div>
       );
     });    
 
@@ -31,16 +34,18 @@ const RecommendationsTreeView = ({ recommendations }) => {
 
     return recommendation.menu.map(menu => {
       if(menu.type === "sectionheader") {
-        return menu.children.map((item, idx) => {
+        return menu.children.map((item) => {
           if((item.type === "item") && (item.selected === 1)) {
             const filteredItems = item.children.filter(i => i.selected === 1);
             return (
-              <TreeItem
-                key={item.id}
-                nodeId={item.id}
-                label={item.name}
-                children={getChildrenRecursively(filteredItems)}
-              />
+              <div draggable="true">
+                <TreeItem
+                  key={item.id}
+                  nodeId={item.id}
+                  label={item.name}
+                  children={getChildrenRecursively(filteredItems)}
+                />
+              </div>
             );
           } else {
             return null;
